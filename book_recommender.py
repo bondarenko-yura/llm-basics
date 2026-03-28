@@ -48,6 +48,13 @@ import numpy as np
 import faiss
 import anthropic
 from sklearn.feature_extraction.text import TfidfVectorizer
+from dotenv import load_dotenv
+
+# Load ANTHROPIC_API_KEY from .env file if present.
+# This makes the code work in IntelliJ, VS Code, and any other IDE
+# without manually setting environment variables in run configurations.
+# The .env file is gitignored so the key is never committed.
+load_dotenv()
 
 # --- Shared state ----------------------------------------------------------
 # The vectorizer must be fitted on the reviews corpus first (inside
