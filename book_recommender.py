@@ -19,9 +19,9 @@ the LLM would have no idea what this particular user likes.
 
 Embeddings in this version
 --------------------------
-The original book example used OpenAI's embedding API (a paid service that
-returns semantically rich vectors). Here we use TF-IDF (Term Frequency–
-Inverse Document Frequency), a classical NLP technique built into scikit-learn:
+We use TF-IDF (Term Frequency–Inverse Document Frequency), a classical NLP
+technique built into scikit-learn. The original book example used OpenAI's
+embedding API instead, but we replaced it to avoid the paid dependency:
 
   - TF-IDF works by counting words and weighting rare words more highly.
   - It is fast, free, and requires no internet connection.
