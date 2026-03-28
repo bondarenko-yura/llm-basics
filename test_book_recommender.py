@@ -20,6 +20,7 @@ The -s flag disables output capture so you can see the print() statements
 that show what the model actually returned.
 """
 
+import pytest
 from book_recommender import index_reviews, retrieve_reviews, predict_rating, reviews
 
 # The book we use as our test case — same as in the original book example.
@@ -81,3 +82,9 @@ def test_predict_rating():
     print(f"\nPredicted rating: {rating}")
     assert rating.strip().isdigit(), f"Expected a single digit, got: {rating!r}"
     assert 1 <= int(rating.strip()) <= 5, f"Rating out of range: {rating}"
+
+
+if __name__ == "__main__":
+    # Allows running directly from IntelliJ (Run/Debug the file).
+    # pytest discovers and executes all test_* functions in this file.
+    pytest.main([__file__, "-v", "-s"])
