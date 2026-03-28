@@ -45,11 +45,11 @@ Claude model, which is more than capable for this simple rating task.
 """
 
 import logging
-import numpy as np
-import faiss
+
 import anthropic
-from sklearn.feature_extraction.text import TfidfVectorizer
+import faiss
 from dotenv import load_dotenv
+from sklearn.feature_extraction.text import TfidfVectorizer
 
 # Configure a logger for this module.
 # Using __name__ is standard practice — it means the logger is named
