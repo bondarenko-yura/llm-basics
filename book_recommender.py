@@ -44,11 +44,23 @@ pass it explicitly. We use claude-haiku-4-5, the smallest and cheapest
 Claude model, which is more than capable for this simple rating task.
 """
 
+import logging
 import numpy as np
 import faiss
 import anthropic
 from sklearn.feature_extraction.text import TfidfVectorizer
 from dotenv import load_dotenv
+
+# Configure a logger for this module.
+# Using __name__ is standard practice — it means the logger is named
+# "book_recommender", which makes it easy to filter in larger applications.
+# Log level INFO shows the pipeline steps; use DEBUG for even more detail.
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(name)s — %(message)s",
+    datefmt="%H:%M:%S",
+)
+logger = logging.getLogger(__name__)
 
 # Load ANTHROPIC_API_KEY from .env file if present.
 # This makes the code work in IntelliJ, VS Code, and any other IDE
@@ -113,6 +125,7 @@ def index_reviews(reviews):
     # vocab_size becomes the "dimension" of our vector space
     index = faiss.IndexFlatL2(vectors.shape[1])
     index.add(vectors)
+    logger.info("Indexed %d reviews (vector dimension: %d)", len(reviews), vectors.shape[1])
     return index
 
 
@@ -145,7 +158,11 @@ def retrieve_reviews(index, query, reviews, k=2):
     # distances shape: (1, k), indices shape: (1, k)
     _, indices = index.search(query_vector, k)
 
-    return [reviews[i] for i in indices[0]]
+    retrieved = [reviews[i] for i in indices[0]]
+    logger.info("Request: %r", query)
+    for i, review in enumerate(retrieved, 1):
+        logger.info("  Recommended review %d: %r", i, review)
+    return retrieved
 
 
 # ---------------------------------------------------------------------------
@@ -179,13 +196,13 @@ def predict_rating(book, related_reviews):
     # It clearly defines the task, provides all relevant context, and
     # constrains the output format.
     prompt = (
-        "Here is a book I might want to read:\n" +
-        book + "\n\n" +
-        "Here are relevant reviews from the past:\n" +
-        reviews_text + "\n\n" +
-        "On a scale of 1 (worst) to 5 (best), "
-        "how likely am I to enjoy this book? "
-        "Reply with no explanation, just a number."
+            "Here is a book I might want to read:\n" +
+            book + "\n\n" +
+            "Here are relevant reviews from the past:\n" +
+            reviews_text + "\n\n" +
+            "On a scale of 1 (worst) to 5 (best), "
+            "how likely am I to enjoy this book? "
+            "Reply with no explanation, just a number."
     )
 
     response = client.messages.create(
@@ -196,4 +213,6 @@ def predict_rating(book, related_reviews):
 
     # response.content is a list of content blocks. For a plain text reply
     # there is always exactly one block of type "text".
-    return response.content[0].text
+    rating = response.content[0].text
+    logger.info("Predicted rating for %r: %s/5", book[:60] + "...", rating)
+    return rating
